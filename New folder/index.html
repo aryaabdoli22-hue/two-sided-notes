@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Two-Sided Notes (Dark Mode)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #121212;
+            color: #e0e0e0;
+        }
+
+        header {
+            background: #1f1f1f;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        main {
+            padding: 1rem;
+        }
+
+        .note-card {
+            background: #1e1e1e;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note-card h3 {
+            margin: 0;
+            cursor: pointer;
+            color: #90caf9;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-add {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1e1e1e;
+            padding: 1rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            color: #e0e0e0;
+        }
+
+        .note-sides {
+            display: flex;
+            gap: 1rem;
+            height: 300px;
+        }
+
+        .note-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .note-side input[type="text"] {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: #121212;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 4px;
+        }
+
+        .note-side textarea {
+            flex: 1;
+            padding: 0.5rem;
+            background: #121212;
+            color: #e0e0e0;
+            border: 1px solid #2196f3;
+            border-radius: 6px;
+            resize: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Two-Sided Notes</h1>
+    </header>
+
+    <main>
+        <div id="notes-list"></div>
+        <button class="btn btn-add" onclick="openEditor()">+ Add Note</button>
+    </main>
+
+    <!-- Modal for Add/Edit -->
+    <div class="modal" id="note-modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Add Note</h2>
+            <div class="note-sides">
+                <div class="note-side">
+                    <input type="text" id="note-front-title" placeholder="" />
+                    <textarea id="note-front" placeholder=""></textarea>
+                </div>
+                <div class="note-side">
+                    <input type="text" id="note-back-title" placeholder="" />
+                    <textarea id="note-back" placeholder=""></textarea>
+                </div>
+            </div>
+            <br />
+            <button class="btn btn-add" onclick="saveNote()">Save</button>
+            <button class="btn" onclick="closeEditor()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let notes = JSON.parse(localStorage.getItem('notes') || '[]');
+        let editIndex = null;
+
+        function renderNotes() {
+            const list = document.getElementById('notes-list');
+            list.innerHTML = '';
+            if (notes.length === 0) {
+                list.innerHTML = '<p>No notes yet! Click + to create one.</p>';
+                return;
+            }
+            notes.forEach((note, index) => {
+                const card = document.createElement('div');
+                card.className = 'note-card';
+                card.innerHTML = `
+                    <h3 onclick="openEditor(${index})">${note.frontTitle} / ${note.backTitle}</h3>
+                    <button class="btn btn-delete" onclick="deleteNote(${index})">Delete</button>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function openEditor(index = null) {
+            editIndex = index;
+            document.getElementById('note-modal').style.display = 'flex';
+            if (index !== null) {
+                document.getElementById('modal-title').innerText = 'Edit Note';
+                document.getElementById('note-front-title').value = notes[index].frontTitle;
+                document.getElementById('note-front').value = notes[index].front;
+                document.getElementById('note-back-title').value = notes[index].backTitle;
+                document.getElementById('note-back').value = notes[index].back;
+            } else {
+                document.getElementById('modal-title').innerText = 'Add Note';
+                document.getElementById('note-front-title').value = '';
+                document.getElementById('note-front').value = '';
+                document.getElementById('note-back-title').value = '';
+                document.getElementById('note-back').value = '';
+            }
+        }
+
+        function closeEditor() {
+            document.getElementById('note-modal').style.display = 'none';
+        }
+
+        function saveNote() {
+            const frontTitle = document.getElementById('note-front-title').value.trim();
+            const front = document.getElementById('note-front').value.trim();
+            const backTitle = document.getElementById('note-back-title').value.trim();
+            const back = document.getElementById('note-back').value.trim();
+
+            if (!frontTitle || !front || !backTitle || !back) {
+                alert('All fields are required');
+                return;
+            }
+
+            const newNote = { frontTitle, front, backTitle, back };
+            if (editIndex !== null) {
+                notes[editIndex] = newNote;
+            } else {
+                notes.push(newNote);
+            }
+            localStorage.setItem('notes', JSON.stringify(notes));
+            closeEditor();
+            renderNotes();
+        }
+
+        function deleteNote(index) {
+            if (confirm('Delete this note?')) {
+                notes.splice(index, 1);
+                localStorage.setItem('notes', JSON.stringify(notes));
+                renderNotes();
+            }
+        }
+
+        renderNotes();
+    </script>
+
+</body>
+
+</html>
