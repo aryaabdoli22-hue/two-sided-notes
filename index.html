@@ -5,7 +5,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Two-Sided Notes (Dark Mode)</title>
+
+    <!-- Manifest -->
     <link rel="manifest" href="./manifest.json">
+
+    <!-- Theme color for status bar -->
+    <meta name="theme-color" content="#121212">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -129,12 +135,12 @@
             <h2 id="modal-title">Add Note</h2>
             <div class="note-sides">
                 <div class="note-side">
-                    <input type="text" id="note-front-title" placeholder="" />
-                    <textarea id="note-front" placeholder=""></textarea>
+                    <input type="text" id="note-front-title" placeholder="Front Title" />
+                    <textarea id="note-front" placeholder="Front Content"></textarea>
                 </div>
                 <div class="note-side">
-                    <input type="text" id="note-back-title" placeholder="" />
-                    <textarea id="note-back" placeholder=""></textarea>
+                    <input type="text" id="note-back-title" placeholder="Back Title" />
+                    <textarea id="note-back" placeholder="Back Content"></textarea>
                 </div>
             </div>
             <br />
@@ -219,14 +225,17 @@
 
         renderNotes();
     </script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
-</script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/two-sided-notes/sw.js')
+                    .then(reg => console.log('Service Worker registered:', reg.scope))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+    </script>
 
 </body>
-
-
 </html>
-
