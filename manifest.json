@@ -1,11 +1,12 @@
 {
     "name": "Two-Sided Notes",
     "short_name": "Notes",
-    "start_url": "/",
-    "scope": "/",
+    "start_url": "/two-sided-notes/",
+    "scope": "/two-sided-notes/",
     "display": "standalone",
     "background_color": "#121212",
     "theme_color": "#121212",
+    "description": "A simple two-sided notes PWA to create and manage notes offline.",
     "icons": [
         {
             "src": "icons/icon-192.png",
@@ -18,8 +19,4 @@
             "type": "image/png"
         }
     ]
-
 }
-
-
-
